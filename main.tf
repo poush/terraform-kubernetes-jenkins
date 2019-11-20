@@ -1,3 +1,17 @@
+resource "kubernetes_namespace" "jenkins_namespace" {
+  metadata {
+    annotations = {
+      name = "jenkins"
+    }
+
+    labels = {
+      managedby = "terraform"
+    }
+
+    name = var.namespace
+  }
+}
+
 resource "kubernetes_persistent_volume_claim" "claim" {
   metadata {
     name      = "${var.name}-claim"
@@ -16,6 +30,9 @@ resource "kubernetes_persistent_volume_claim" "claim" {
     storage_class_name = var.storageclass
     volume_name        = var.name
   }
+  depends_on = [
+    kubernetes_namespace.jenkins_namespace
+  ]
 }
 
 resource "kubernetes_deployment" "jenkins" {
@@ -73,6 +90,7 @@ resource "kubernetes_deployment" "jenkins" {
 }
 
 resource "kubernetes_service" "jenkins-service" {
+  depends_on = [kubernetes_deployment.jenkins]
   metadata {
     name      = var.name
     namespace = var.namespace
