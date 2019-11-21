@@ -1,4 +1,5 @@
 resource "kubernetes_namespace" "jenkins_namespace" {
+  count = var.create_namespace ? 1 : 0
   metadata {
     annotations = {
       name = "jenkins"
@@ -28,7 +29,6 @@ resource "kubernetes_persistent_volume_claim" "claim" {
       }
     }
     storage_class_name = var.storageclass
-    volume_name        = var.name
   }
   depends_on = [
     kubernetes_namespace.jenkins_namespace
@@ -36,7 +36,9 @@ resource "kubernetes_persistent_volume_claim" "claim" {
 }
 
 resource "kubernetes_deployment" "jenkins" {
-  depends_on = [kubernetes_persistent_volume_claim.claim]
+  depends_on = [
+    kubernetes_namespace.jenkins_namespace
+  ]
 
   metadata {
     name = "${var.name}-deployment"
@@ -47,7 +49,7 @@ resource "kubernetes_deployment" "jenkins" {
   }
 
   spec {
-    replicas = 1
+    replicas = var.replicas
 
     selector {
       match_labels = {
@@ -64,7 +66,7 @@ resource "kubernetes_deployment" "jenkins" {
 
       spec {
         container {
-          image = "civicactions/docker-jenkins"
+          image = var.jenkins_image
           name  = var.name
           port {
             container_port = "8080"
@@ -81,7 +83,7 @@ resource "kubernetes_deployment" "jenkins" {
         volume {
           name = "${var.name}-persistent-storage"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.claim.metadata[0].name
+            claim_name = "${var.name}-claim"
           }
         }
       }
@@ -90,7 +92,10 @@ resource "kubernetes_deployment" "jenkins" {
 }
 
 resource "kubernetes_service" "jenkins-service" {
-  depends_on = [kubernetes_deployment.jenkins]
+  depends_on = [
+    kubernetes_deployment.jenkins,
+    kubernetes_namespace.jenkins_namespace
+  ]
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -108,6 +113,7 @@ resource "kubernetes_service" "jenkins-service" {
       name = "http"
     }
 
-    type = "Service"
+    type = "ClusterIP"
   }
 }
+

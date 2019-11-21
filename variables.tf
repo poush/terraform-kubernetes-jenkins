@@ -1,19 +1,39 @@
 variable "request_storage" {
-  default = "5Gi"
+  description = "storage for your jenkins installation"
+  default     = "5Gi"
 }
 
 variable "accessmode" {
-  default = "ReadWriteOnce"
+  description = "access mode for jenkins persistent volume claim"
+  default     = "ReadWriteOnce"
 }
 
 variable "name" {
-  default = "jenkins"
+  description = "name of your jenkins application, will be used as prefix for all manifests"
+  default     = "jenkins"
 }
 
 variable "namespace" {
-  default = "jenkins"
+  description = "namespace where all the jenkins resources will be created"
+  default     = "jenkins"
 }
 
 variable "storageclass" {
-  default = "gp2"
+  description = "storageclass to use for creating persistent volume claim, defaults to gp2 of AWS"
+  default     = "gp2"
+}
+
+variable "create_namespace" {
+  description = "to create the namespace or not"
+  type        = bool
+}
+
+variable "jenkins_image" {
+  description = "docker image with the tag"
+  default     = "civicactions/docker-jenkins"
+}
+
+variable "replicas" {
+  description = "no. of replicas you want"
+  default     = "1"
 }
