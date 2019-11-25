@@ -30,7 +30,7 @@ variable "create_namespace" {
 
 variable "jenkins_image" {
   description = "docker image with the tag"
-  default     = "civicactions/docker-jenkins"
+  default     = "jenkins/jenkins:latest"
 }
 
 variable "replicas" {

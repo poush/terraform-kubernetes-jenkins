@@ -112,8 +112,45 @@ resource "kubernetes_service" "jenkins-service" {
       port = 8080
       name = "http"
     }
+    port {
+      port = 50000
+      name = "tunnel"
+    }
 
     type = "ClusterIP"
   }
 }
 
+# resource "kubernetes_secret" "this" {
+#   metadata {
+#     name = "${var.name}-admin"
+#     annotations = {
+#       "kubernetes.io/service-account.name" = "${var.name}-admin"
+#     }
+#   }
+
+#   type = "kubernetes.io/service-account-token"
+# }
+
+resource "kubernetes_service_account" "thia" {
+  metadata {
+    name      = "${var.name}-admin"
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "this" {
+  metadata {
+    name = "${var.name}-rbac"
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "${var.name}-admin"
+    namespace = var.namespace
+  }
+}
