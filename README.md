@@ -1,3 +1,5 @@
+![actions badge](https://github.com/poush/terraform-kubernetes-jenkins/workflows/Lint/badge.svg)
+
 # Terraform - Kubernetes - Jenkins
 
 This module installs jenkins in your kubernetes cluster through the kubernetes deployment.
